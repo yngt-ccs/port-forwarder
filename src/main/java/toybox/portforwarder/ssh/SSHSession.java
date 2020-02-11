@@ -9,7 +9,7 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 
 import toybox.portforwarder.ssh.setting.ConnectionSetting;
-import toybox.portforwarder.ssh.setting.L2R_Setting;
+import toybox.portforwarder.ssh.setting.LocalForwardSetting;
 
 /**
  * SSHセッション.
@@ -18,6 +18,7 @@ public class SSHSession implements Runnable {
 
 	private Logger logger;
 
+	/** SSJ 接続設定. */
 	private ConnectionSetting setting;
 
 	/** Keep-Alive 送信間隔. */
@@ -29,7 +30,7 @@ public class SSHSession implements Runnable {
 	/** 再接続待ち時間. */
 	private static final int RETRY_WAIT_MILSEC = 10000;
 
-	/** SSH セッション. */
+	/** Jsch セッション. */
 	private Session session;
 
 	/**
@@ -125,12 +126,11 @@ public class SSHSession implements Runnable {
 
 		logger.info("SSH Session connected.");
 
-		// Port forward (l2r)
-		for (L2R_Setting l2r : setting.getL2rSettings()) {
-			String toHost = l2r.getForwardToHost();
-			int toPort = l2r.getForwardToPort();
-
-			int assinged_port = session.setPortForwardingL(l2r.getLocalListenPort(), toHost, toPort);
+		// Port forward (local forward)
+		for (LocalForwardSetting localForward : setting.getLocalForwards()) {
+			String toHost = localForward.getForwardToHost();
+			int toPort = localForward.getForwardToPort();
+			int assinged_port = session.setPortForwardingL(localForward.getLocalListenPort(), toHost, toPort);
 			logger.info("L2R Fowrad added. (localhost:" + assinged_port + " -> " + toHost + ":" + toPort + ")");
 		}
 

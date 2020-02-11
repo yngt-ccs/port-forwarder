@@ -3,10 +3,10 @@ package toybox.portforwarder.ssh.setting;
 import lombok.Data;
 
 /**
- * ポート転送設定 (Local to Remote).
+ * ポート転送設定 (Local forward).
  */
 @Data
-public class L2R_Setting {
+public class LocalForwardSetting {
 
 	/** ローカル 待機ポート. */
 	private int localListenPort;

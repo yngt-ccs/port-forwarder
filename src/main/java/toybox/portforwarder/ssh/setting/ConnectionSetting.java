@@ -32,6 +32,6 @@ public class ConnectionSetting {
 	/** ホスト認証要否. */
 	private boolean strictHostKeyChecking = true;
 
-	/** ポート転送設定(Local to Remote). */
-	private final List<L2R_Setting> l2rSettings = new ArrayList<>();
+	/** ポート転送設定(Local forward). */
+	private final List<LocalForwardSetting> localForwards = new ArrayList<>();
 }
