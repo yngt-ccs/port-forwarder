@@ -1,3 +1,9 @@
+# project
+conf/*
+!conf/.gitkeep
+
+
+##### default #####
 HELP.md
 target/
 !.mvn/wrapper/maven-wrapper.jar
