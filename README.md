@@ -16,6 +16,9 @@ SSHの接続先単位で、こんな感じのJSON設定ファイルを準備し�
 	"identityFile": "[秘密鍵]",
 	"knownHostsFile": "[ホスト公開鍵(必要に応じて)]",
 	"strictHostKeyChecking": [true(ホスト認証する時)/false(しない時)の二択],
+	"proxyType": "[http/socks4/socks5 の3択]",
+	"proxyHost": "[プロキシ ホスト]",
+	"proxyPort": 3128,
 	"localForwards": [
 		{
 			"localListenPort": [ローカルの待機ポート],

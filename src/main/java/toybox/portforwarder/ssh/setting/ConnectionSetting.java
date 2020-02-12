@@ -28,10 +28,24 @@ public class ConnectionSetting {
 
 	/** ホスト公開鍵. */
 	private String knownHostsFile;
-
 	/** ホスト認証要否. */
 	private boolean strictHostKeyChecking = true;
 
+	/** プロキシ サーバー種別. */
+	private ProxyType proxyType;
+	/** プロキシ ホスト. */
+	private String proxyHost;
+	/** プロキシ ポート. */
+	private Integer proxyPort;
+
 	/** ポート転送設定(Local forward). */
 	private final List<LocalForwardSetting> localForwards = new ArrayList<>();
+
+	/** プロキシ種別. */
+	public enum ProxyType {
+		none,
+		http,
+		socks4,
+		socks5
+	}
 }

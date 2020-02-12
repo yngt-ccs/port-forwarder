@@ -6,9 +6,13 @@ import org.slf4j.LoggerFactory;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.ProxyHTTP;
+import com.jcraft.jsch.ProxySOCKS4;
+import com.jcraft.jsch.ProxySOCKS5;
 import com.jcraft.jsch.Session;
 
 import toybox.portforwarder.ssh.setting.ConnectionSetting;
+import toybox.portforwarder.ssh.setting.ConnectionSetting.ProxyType;
 import toybox.portforwarder.ssh.setting.LocalForwardSetting;
 
 /**
@@ -30,6 +34,9 @@ public class SSHSession implements Runnable {
 	/** 再接続待ち時間. */
 	private static final int RETRY_WAIT_MILSEC = 10000;
 
+	/** Jsch セッション ファクトリ. */
+	private JSch jsch;
+
 	/** Jsch セッション. */
 	private Session session;
 
@@ -37,15 +44,28 @@ public class SSHSession implements Runnable {
 	 * コンストラクタ.
 	 *
 	 * @param setting 接続設定.
+	 * @throws JSchException
 	 */
-	public SSHSession(ConnectionSetting setting) {
+	public SSHSession(ConnectionSetting setting) throws JSchException {
 		this.setting = setting;
 		logger = LoggerFactory.getLogger(SSHSession.class.getName() + "." + setting.getConnectionName());
+
 	}
 
 	@Override
 	public void run() {
 		try {
+			// JSch config
+			jsch = new JSch();
+			if (setting.isStrictHostKeyChecking()) {
+				String knownHosts = ConfReader.getConfFilePathAsString(setting.getKnownHostsFile());
+				jsch.setKnownHosts(knownHosts);
+			} else {
+				JSch.setConfig("StrictHostKeyChecking", "no");
+				logger.warn("HostKey checking disabled.");
+			}
+
+			// 接続中はループ実行
 			while (!Thread.currentThread().isInterrupted()) {
 				loop();
 			}
@@ -98,17 +118,7 @@ public class SSHSession implements Runnable {
 	}
 
 	private void openSession() throws JSchException {
-		logger.info("Connecting SSH session...");
-
-		// JSch config
-		JSch jsch = new JSch();
-		if (setting.isStrictHostKeyChecking()) {
-			String knownHosts = ConfReader.getConfFilePathAsString(setting.getKnownHostsFile());
-			jsch.setKnownHosts(knownHosts);
-		} else {
-			JSch.setConfig("StrictHostKeyChecking", "no");
-			logger.warn("HostKey checking disabled.");
-		}
+		logger.info("Connecting SSH session... (host=" + setting.getRemoteHost() + ":" + setting.getRemotePort() + ")");
 
 		// authn
 		String identityFile = ConfReader.getConfFilePathAsString(setting.getIdentityFile());
@@ -118,6 +128,31 @@ public class SSHSession implements Runnable {
 		// connect option
 		session.setServerAliveInterval(KEEPALIVE_INTERVAL_MILSEC);
 		session.setTimeout(CONNECTION_TIMEOUT_MILSEC);
+
+		ProxyType proxyType = setting.getProxyType();
+		if (proxyType != null) {
+			String proxyHost = setting.getProxyHost();
+			int proxyPort = setting.getProxyPort();
+
+			switch (proxyType) {
+			case http:
+				session.setProxy(new ProxyHTTP(proxyHost, proxyPort));
+				logger.info("http proxy enabled. (proxy=" + proxyHost + ":" + proxyPort + ")");
+				break;
+			case socks4:
+				session.setProxy(new ProxySOCKS4(proxyHost, proxyPort));
+				logger.info("socks4 proxy enabled. (proxy=" + proxyHost + ":" + proxyPort + ")");
+				break;
+			case socks5:
+				session.setProxy(new ProxySOCKS5(proxyHost, proxyPort));
+				logger.info("socks5 proxy enabled. (proxy=" + proxyHost + ":" + proxyPort + ")");
+				break;
+			case none:
+			default:
+				logger.debug("proxy disabled.");
+				break;
+			}
+		}
 
 		// exec
 		session.connect();
@@ -131,7 +166,7 @@ public class SSHSession implements Runnable {
 			String toHost = localForward.getForwardToHost();
 			int toPort = localForward.getForwardToPort();
 			int assinged_port = session.setPortForwardingL(localForward.getLocalListenPort(), toHost, toPort);
-			logger.info("L2R Fowrad added. (localhost:" + assinged_port + " -> " + toHost + ":" + toPort + ")");
+			logger.info("Local fowrad added. (localhost:" + assinged_port + " -> (ssh host) -> " + toHost + ":" + toPort + ")");
 		}
 
 	}
