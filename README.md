@@ -24,7 +24,7 @@ SSHの接続先単位で、こんな感じのJSON設定ファイルを準備し�
 			"localListenPort": [ローカルの待機ポート],
 			"forwardToHost": "[転送先ホスト]",
 			"forwardToPort": [転送先ポート]
-		} , 
+		} ,
 		...(複数定義可)
 	]
 }
@@ -56,6 +56,3 @@ C:\Users\yngt\git\port-forwarder>java -jar Port-Forwarder-0.0.1-SNAPSHOT.jar
 
 ### 鍵ファイルの指定方法
 - JSONで指定する鍵ファイルは、conf ディレクトリ内のファイル名と、conf ディレクトリ外のパスのいずれかを指定できます。
-
-### なんで SpringBoot なの？
-- 接続管理画面っぽいものを作る構想だったけど面倒臭くなって挫折しました。
