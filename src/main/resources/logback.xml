@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <configuration>
-    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %5p - [%15t] %-40.40logger{39} : %m%n" />
+    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %5p - [%14t] %-25.25logger{24} : %m%n" />
 
     <timestamp key="LOG_DATE" datePattern="yyyyMMdd" />
     <property name="LOG_FILE" value="/var/log/port-forwarder/port-forwarder.log" />
